@@ -108,7 +108,7 @@ function addEmployee() {
       {
         type: "input",
         name: "role_id",
-        message: "Please enter role of your employee",
+        message: "Please enter role id of your employee",
       },
       {
         type: "input",
@@ -196,7 +196,7 @@ function updateEmployeeRole() {
       },
     ]).then((resp)=>{
     connection.query("UPDATE employees SET role_id = ? WHERE employee_id = ?",
-    [resp.employee_id,resp.new_role],
+    [parseInt(resp.employee_id),parseInt(resp.new_role)],
         function (err, result) {
           if (err) throw err;
           init()
