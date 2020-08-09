@@ -1,7 +1,7 @@
 //dependencies
 var mysql = require("mysql");
 var inquirer =require("inquirer")
-
+//connection with database
 var connection = mysql.createConnection({
   host: "localhost",
   port: 3306,
@@ -16,20 +16,12 @@ connection.connect(function (err) {
   init();
 });
 
-//create a list of questions for inquirer
-//functions
-
-// build a command-line application that at a minimum allows the user to:
-
-//   * Add departments, roles, employees
-
-//   * View departments, roles, employees
-
-//   * Update employee roles
+//starting function 
 function init() {
   inquirer
     .prompt([
       {
+        //list of choices
         type: "list",
         name: "team",
         message: "What would you like to do?",
@@ -47,13 +39,15 @@ function init() {
       },
     ])
     .then((response) => {
+      //how to close ann app
       if (response.team === "Exit") {
         console.log("No problem!See you next time!");
         connection.end();
       } else {
+        //list of functions that gonna handle different responses
         switch (response.team) {
           case "View  Employees":
-            //pull all the employees from the data base
+            //pull all the employees from the data base and display in console in table
             connection.query("SELECT * FROM employees", function (err, res) {
               if (err) throw err;
               console.table(res)
@@ -61,7 +55,7 @@ function init() {
             });
             break;
           case "View Departments":
-            //pull all the departments from db
+            //pull all the departments from db and display in console in table
             connection.query("SELECT * FROM departments", function (err, res) {
               if (err) throw err;
               console.table(res)
@@ -69,7 +63,7 @@ function init() {
             });
             break;
           case "View Roles":
-            //pull all the roles from the data base
+            //pull all the roles from the data base and display in console in table
             connection.query("SELECT * FROM roles", function (err, res) {
               if (err) throw err;
               console.table(res)
@@ -97,7 +91,7 @@ function init() {
       }
     });
 }
-
+//fuctions that help to manipulate users input
 function addEmployee() {
   inquirer
     .prompt([
@@ -124,6 +118,7 @@ function addEmployee() {
     ])
     .then((resp) => {
       connection.query(
+        //formulating  command to insert info into db 
         "INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?,?,?,?)",
         [resp.firstName, resp.lastName, parseInt(resp.role_id), parseInt(resp.manager_id)],
         function (err, result) {
