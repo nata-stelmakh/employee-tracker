@@ -32,7 +32,6 @@ function init() {
           "Add Employee",
           "Add Role",
           "Add Department",
-          "Update Employee",
           "Update Employee Role",
           "Exit",
         ],
@@ -75,7 +74,7 @@ function init() {
             addEmployee();
 
             break;
-          case "Add Departments":
+          case "Add Department":
             //add department in a db
             addDepartment();
             break;
@@ -135,12 +134,12 @@ function addDepartment() {
       {
         type: "input",
         name: "name",
-        message: "What is the name of your department?",
+        message: "Please enter name of a new department",
       }
     ])
     .then((resp) => {
       connection.query(
-        "INSERT INTO departments (name) VALUES ?",
+        "INSERT INTO departments (name) VALUES (?)",
         [resp.name],
         function (err, result) {
           if (err) throw err;
@@ -195,7 +194,7 @@ function updateEmployeeRole() {
         message: "Please enter the new role id",
       },
     ]).then((resp)=>{
-    connection.query("UPDATE employees SET role_id = ? WHERE employee_id = ?",
+    connection.query("UPDATE employees SET role_id = (?) WHERE id = (?)",
     [parseInt(resp.employee_id),parseInt(resp.new_role)],
         function (err, result) {
           if (err) throw err;
