@@ -1,6 +1,6 @@
 //dependencies
 var mysql = require("mysql");
-var inquirer =require("inquirer")
+var inquirer = require("inquirer")
 //connection with database
 var connection = mysql.createConnection({
   host: "localhost",
@@ -47,7 +47,9 @@ function init() {
         switch (response.team) {
           case "View  Employees":
             //pull all the employees from the data base and display in console in table
-            connection.query("SELECT * FROM employees", function (err, res) {
+            connection.query(`SELECT e.id, e.first_name, e.last_name, r.title, r.salary, em.first_name as "manager first name" FROM employees e
+            INNER JOIN employees em ON e.manager_id = em.id
+            INNER JOIN roles r ON e.role_id = r.id`, function (err, res) {
               if (err) throw err;
               console.table(res)
               init();
@@ -126,10 +128,10 @@ function addEmployee() {
         }
       );
     });
-  }
+}
 
 function addDepartment() {
-    inquirer
+  inquirer
     .prompt([
       {
         type: "input",
@@ -149,7 +151,7 @@ function addDepartment() {
     });
 }
 function addRoles() {
-    inquirer
+  inquirer
     .prompt([
       {
         type: "input",
@@ -170,7 +172,7 @@ function addRoles() {
     .then((resp) => {
       connection.query(
         "INSERT INTO roles (title,salary,department_id) VALUES (?,?,?)",
-        [resp.title,parseFloat(resp.salary),parseInt( resp.department_id)],
+        [resp.title, parseFloat(resp.salary), parseInt(resp.department_id)],
         function (err, result) {
           if (err) throw err;
           init()
@@ -181,7 +183,7 @@ function addRoles() {
 
 
 function updateEmployeeRole() {
-    inquirer
+  inquirer
     .prompt([
       {
         type: "input",
@@ -193,12 +195,12 @@ function updateEmployeeRole() {
         name: "new_role",
         message: "Please enter the new role id",
       },
-    ]).then((resp)=>{
-    connection.query("UPDATE employees SET role_id = (?) WHERE id = (?)",
-    [parseInt(resp.employee_id),parseInt(resp.new_role)],
+    ]).then((resp) => {
+      connection.query("UPDATE employees SET role_id =? WHERE id =? ",
+        [parseInt(resp.employee_id), parseInt(resp.new_role)],
         function (err, result) {
           if (err) throw err;
           init()
         })
-})
+    })
 }
