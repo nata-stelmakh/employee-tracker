@@ -48,7 +48,7 @@ function init() {
           case "View  Employees":
             //pull all the employees from the data base and display in console in table
             connection.query(`SELECT e.id, e.first_name, e.last_name, r.title, r.salary, em.first_name as "manager first name" FROM employees e
-            INNER JOIN employees em ON e.manager_id = em.id
+            LEFT JOIN employees em ON e.manager_id = em.id
             INNER JOIN roles r ON e.role_id = r.id`, function (err, res) {
               if (err) throw err;
               console.table(res)
@@ -181,26 +181,57 @@ function addRoles() {
     });
 }
 
+let roles = []
+let employeesList = []
 
 function updateEmployeeRole() {
-  inquirer
-    .prompt([
-      {
-        type: "input",
-        name: "employee_id",
-        message: "What is the  employee's id?"
-      },
-      {
-        type: "input",
-        name: "new_role",
-        message: "Please enter the new role id",
-      },
-    ]).then((resp) => {
-      connection.query("UPDATE employees SET role_id =? WHERE id =? ",
-        [parseInt(resp.employee_id), parseInt(resp.new_role)],
-        function (err, result) {
-          if (err) throw err;
-          init()
+  //SQL Query to get roles array
+  connection.query(`SELECT e.id, e.first_name, e.last_name FROM employees e`, function (err, res) {
+    if (err)
+      console.log(err)
+
+    console.log(res)
+    employeesList = res.map(({ id, first_name, last_name }) => ({ name: first_name + " " + last_name, value: id }))
+    connection.query(`SELECT r.id, r.title FROM roles r`, function (err, res) {
+      if (err)
+        console.log(err)
+      console.log(res)
+      roles = res.map(({ id, title }) => ({ name: title, value: id }))
+      inquirer
+        .prompt([
+          {
+            type: "list",
+            name: "employee_id",
+            message: "What is the employee's first and last name?",
+            choices: employeesList//employeesList //set type to be inquirer list and research how to attribute values to user choice.
+          },
+          {
+            type: "list",
+            name: "new_role",
+            message: "Please enter the new role",
+            choices: roles//roles
+          },
+        ]).then((resp) => {//then use the ids of the values the user selected in stead of using the direct selection of the id.  The code below should stay mostly the same unless you want to implement async away here a well.
+          connection.query("UPDATE employees SET role_id =? WHERE id =? ",
+            [parseInt(resp.new_role), parseInt(resp.employee_id)],
+            function (err, result) {
+              if (err) throw err;
+              console.log(result)
+              console.log("IDS", parseInt(resp.employee_id), parseInt(resp.new_role))
+              init()
+            })
         })
     })
+  })
+
+  // //SQL Query to get employees array (order doesn't matter)
+  // connection.query(`SELECT e.first_name, e.last_name FROM employees`, function (err, res) {
+  //   console.log(res)
+  //   employeesList = res
+  // connection.query(`SELECT e.id, e.first_name, e.last_name, r.title FROM employees e  INNER JOIN roles r ON e.role_id = r.id`, function (err, res) {
+  //   console.log(res)
+
+  //});
+  //Refer back to async await and try catch blocks, this will help make this easier and spare you nested callbacks
+
 }
